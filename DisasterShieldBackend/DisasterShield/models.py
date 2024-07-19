@@ -28,7 +28,7 @@ class report(models.Model):
     is_valid = models.BooleanField(default=True)
     severity = models.IntegerField(default=1)
 
-class Blood_donation(models.Model):
+class blood_donation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.ForeignKey('auth.User',on_delete=models.CASCADE)
     priority = models.BooleanField(default=False)
