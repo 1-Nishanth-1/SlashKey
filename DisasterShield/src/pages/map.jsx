@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Popup, Marker, Circle } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useRef, useMemo } from "react";
-import {jwtDecode} from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 function Map() {
   const [draggable, setDraggable] = useState(false);
@@ -92,7 +92,31 @@ function Map() {
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        setCalamityData([...calamityData, data]);
+
+        // Check if calamity with the same latitude and longitude exists
+        const existingCalamity = calamityData.find(
+          (calamity) =>
+            calamity.latitude === position.latitude &&
+            calamity.longitude === position.longitude
+        );
+
+        if (existingCalamity) {
+          // Update severity in state
+          setCalamityData(
+            calamityData.map((calamity) =>
+              calamity.latitude === position.latitude &&
+              calamity.longitude === position.longitude
+                ? {
+                    ...calamity,
+                    severity: Math.max(calamity.severity, data.severity),
+                  } // Update severity logic as needed
+                : calamity
+            )
+          );
+        } else {
+          // Add new calamity to state
+          setCalamityData([...calamityData, data]);
+        }
       })
       .catch((error) => console.error("Error submitting form:", error));
 
@@ -142,26 +166,34 @@ function Map() {
                   className="block mt-3 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                   onChange={(e) => setImage(e.target.files[0])}
                 />
-                <button type="submit" className="mt-3 bg-black text-white font-semibold rounded-3xl py-1.5 px-4">
+                <button
+                  type="submit"
+                  className="mt-3 bg-black text-white font-semibold rounded-3xl py-1.5 px-4"
+                >
                   Submit
                 </button>
               </form>
             ) : (
-              <button onClick={toggleDraggable}>Click here to add a warning</button>
+              <button onClick={toggleDraggable}>
+                Click here to add a warning
+              </button>
             )}
           </Popup>
         </Marker>
-        {calamityData.map((calamity) => {
-            return (
-              <Circle
-                key={calamity.id} // Assuming `id` is a unique identifier for each calamity
-                center={[calamity.latitude, calamity.longitude]}
-                pathOptions={{ color: calamity.severity > 5 ? "red" : "yellow" }}
-                radius={3000}
-              />
-            );
-          } 
-        )}
+        {calamityData
+          .filter(
+            (calamity) =>
+              calamity.latitude !== undefined &&
+              calamity.longitude !== undefined
+          )
+          .map((calamity) => (
+            <Circle
+              key={calamity.id}
+              center={[calamity.latitude, calamity.longitude]}
+              pathOptions={{ color: calamity.severity > 5 ? "red" : "yellow" }}
+              radius={3000}
+            />
+          ))}
       </MapContainer>
     )
   );

@@ -1,12 +1,11 @@
-from .models import report, userReputation
+from .models import *
 from . import utils
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserRegistrationSerializer
-from rest_framework.decorators import api_view, permission_classes
 from .serializers import *
+from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
 
 class UserRegistrationView(APIView):
@@ -18,7 +17,6 @@ class UserRegistrationView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 def inform_authorities():
     # Send a notification to the authorities
@@ -29,21 +27,18 @@ def inform_authorities():
 def create_report(request):
     if request.method == 'POST':
         data = request.data
-
         latitude = data.get('latitude')
         longitude = data.get('longitude')
-        
+
         try:
             lat_min, lat_max, lon_min, lon_max = utils.boundingBox(latitude, longitude, 0.5)
         except ValueError as e:
             return Response({'error': f'Error unpacking bounding box coordinates: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
         reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
-        curr_location = (latitude, longitude)
 
         try:
             curr_reputation = userReputation.objects.get(username=data.get('username')).reputation
-            print(curr_reputation)
         except userReputation.DoesNotExist:
             curr_reputation = 0
 
@@ -64,52 +59,53 @@ def create_report(request):
             reports.update(severity=curr_severity + severity_inc)
             if curr_severity + severity_inc >= 7:
                 inform_authorities()
-            
             serializer = reportsSerializer(reports, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-            # return Response({'message': 'Report updated successfully'}, status=status.HTTP_200_OK)
-            
         else:
             data['severity'] = severity_set
-            print(data['severity'])
             serializer = reportsSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                print("Error creating report:", serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     elif request.method == 'GET':
         reports = report.objects.all()
         serializer = reportsSerializer(reports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
 
-
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def verify_report(request):
-
     data = request.data
-
     response = data.get('response')
     uname = data.get('username')
     report_id = data.get('id')
 
+    try:
+        report_instance = report.objects.get(id=report_id, username=uname)
+        curr_severity = report_instance.severity
+    except report.DoesNotExist:
+        return Response({'error': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    curr_severity = report.objects.filter(username=uname).values('severity')
+    user_instance = userReputation.objects.filter(username=uname).first()
 
-    if response == True:
-        report.objects.filter(username=uname).update(severity = curr_severity+1)
-        if(curr_severity + 1 >= 7):
-            user = report.objects.filter(username=uname).values('username')
-            curr_reputation = userReputation.objects.filter(username=user).values('reputation')
-            userReputation.objects.filter(username=user).update(reputation = curr_reputation+1)
+    if response:
+        report_instance.severity += 1
+        if report_instance.severity >= 7:
+            user_instance.reputation += 1
             inform_authorities()
+        report_instance.save()
+        user_instance.save()
     else:
-        report.objects.filter(username=uname).update(severity = curr_severity-1)
-        if(report.objects.filter(username=uname).values('severity') <= -2):
-            user = report.objects.filter(username=uname).values('username')
-            curr_reputation = userReputation.objects.filter(username=user).values('reputation')
-            userReputation.objects.filter(username=user).update(reputation = curr_reputation-1)
-            report.objects.filter(username=uname).delete()
+        report_instance.severity -= 1
+        if report_instance.severity <= -2:
+            if user_instance:
+                user_instance.reputation -= 1
+                user_instance.save()
+            report_instance.delete()
+        else:
+            report_instance.save()
+
+    return Response({'message': 'Report verification updated successfully'}, status=status.HTTP_200_OK)
