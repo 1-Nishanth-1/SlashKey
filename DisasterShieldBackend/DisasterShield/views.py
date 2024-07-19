@@ -1,4 +1,4 @@
-from .models import report, userReputation
+from .models import report, userReputation, blood_donation
 from . import utils
 from rest_framework.permissions import AllowAny
 from rest_framework import status
@@ -30,8 +30,8 @@ def create_report(request):
     if request.method == 'POST':
         data = request.data
 
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
+        latitude = float(data.get('latitude'))
+        longitude = float(data.get('longitude'))
         
         try:
             lat_min, lat_max, lon_min, lon_max = utils.boundingBox(latitude, longitude, 0.5)
@@ -118,11 +118,16 @@ def verify_report(request):
 
 @api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
-def blood_donation(request):
-    if(request.method == 'GET'):
-        data = request.data
-        serializer = bloodDonationSerializer(data=data)
+def blood_donation_fn(request):
+    if request.method == 'GET':
+        blood_data = blood_donation.objects.all()
+        serializer = bloodDonationSerializer(blood_data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        serializer = bloodDonationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
