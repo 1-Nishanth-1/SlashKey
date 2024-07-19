@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from .serializers import UserRegistrationSerializer
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import *
+from django.http import HttpResponse
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -17,6 +18,10 @@ class UserRegistrationView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+def inform_authorities():
+    # Send a notification to the authorities
+    pass
     
 @api_view(['POST'])
 @permission_classes([AllowAny])
