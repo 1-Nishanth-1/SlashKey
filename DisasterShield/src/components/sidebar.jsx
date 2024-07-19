@@ -1,8 +1,8 @@
-import { NavLink } from "react-router-dom"
-import hamburger from "../assets/hamburger.png"
-import { useState } from "react"
-import close from "../assets/close.png"
-import ResponsiveNavbar from "./responsive-nav"
+import { NavLink } from "react-router-dom";
+import hamburger from "../assets/hamburger.png";
+import { useEffect, useState } from "react";
+import close from "../assets/close.png";
+import ResponsiveNavbar from "./responsive-nav";
 function Navbar() {
     const [clicked, setClicked] = useState(false);
     const handleClose = () => {
@@ -35,4 +35,4 @@ function Navbar() {
         </header>
     )
 }
-export default Navbar
+export default Navbar;
