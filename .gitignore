@@ -1,1 +1,3 @@
 venv/
+DisasterShieldBackend/db.sqlite3
+DisasterShieldBackend/DisasterShieldBackend/__pycache__/
