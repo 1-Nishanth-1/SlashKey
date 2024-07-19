@@ -1,5 +1,6 @@
 
 from django.contrib.auth.models import User
+from .models import *
 from rest_framework import serializers
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -16,3 +17,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+class reportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = report
+        fields = ['username', 'latitude', 'longitude', 'desc', 'image', 'is_valid', 'severity']
