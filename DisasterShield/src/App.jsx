@@ -6,6 +6,10 @@ import Login from './pages/login'
 import SignUp from './pages/signin'
 import {Routes, Route, BrowserRouter as Router} from "react-router-dom"
 import Map from './pages/map'
+import HelpSideBar from './components/help-sidebar'
+import Missing from './pages/missing'
+import HelpAndServicePage from './pages/helpAndService'
+import Response from './pages/response'
 function App() {
   return (
     <>
@@ -13,6 +17,9 @@ function App() {
 
       <Navbar />
       <Routes>
+        <Route path='/add-response' element={<Response />}/>
+        <Route path='/missing' element={<Missing />} />
+        <Route path='/help' element={<HelpAndServicePage />}/>
         <Route path='/signin' element={<Login />}/>
         <Route path='/register' element={<SignUp />}/>
         <Route path='/' element={<Map />}/>
