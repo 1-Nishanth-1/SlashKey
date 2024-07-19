@@ -38,7 +38,8 @@ def create_report(request):
         except ValueError as e:
             return Response({'error': f'Error unpacking bounding box coordinates: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+        # reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+        reports = report.objects.filter(latitude = latitude, longitude = longitude)
         curr_location = (latitude, longitude)
 
         try:
@@ -113,3 +114,15 @@ def verify_report(request):
             curr_reputation = userReputation.objects.filter(username=user).values('reputation')
             userReputation.objects.filter(username=user).update(reputation = curr_reputation-1)
             report.objects.filter(username=uname).delete()
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def blood_donation(request):
+    if(request.method == 'GET'):
+        data = request.data
+        serializer = bloodDonationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
