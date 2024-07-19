@@ -28,3 +28,12 @@ class reportsSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = report
 #         fields = []
+
+class bloodDonationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blood_donation
+        fields = ['username', 'priority', 'patient_name', 'blood_type', 'contact_number', 'age', 'gender', 'is_valid']
+                          
+
+
+    

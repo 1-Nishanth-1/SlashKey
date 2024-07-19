@@ -35,7 +35,9 @@ def create_report(request):
         except ValueError as e:
             return Response({'error': f'Error unpacking bounding box coordinates: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+        # reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+        reports = report.objects.filter(latitude = latitude, longitude = longitude)
+        curr_location = (latitude, longitude)
 
         try:
             curr_reputation = userReputation.objects.get(username=data.get('username')).reputation
@@ -99,13 +101,21 @@ def verify_report(request):
         report_instance.save()
         user_instance.save()
     else:
-        report_instance.severity -= 1
-        if report_instance.severity <= -2:
-            if user_instance:
-                user_instance.reputation -= 1
-                user_instance.save()
-            report_instance.delete()
-        else:
-            report_instance.save()
+        report.objects.filter(username=uname).update(severity = curr_severity-1)
+        if(report.objects.filter(username=uname).values('severity') <= -2):
+            user = report.objects.filter(username=uname).values('username')
+            curr_reputation = userReputation.objects.filter(username=user).values('reputation')
+            userReputation.objects.filter(username=user).update(reputation = curr_reputation-1)
+            report.objects.filter(username=uname).delete()
 
-    return Response({'message': 'Report verification updated successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST', 'GET'])
+@permission_classes([AllowAny])
+def blood_donation(request):
+    if(request.method == 'GET'):
+        data = request.data
+        serializer = bloodDonationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
