@@ -18,8 +18,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
     
-    
+
 class reportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = report
         fields = ['username', 'latitude', 'longitude', 'desc', 'image', 'is_valid', 'severity']
+
+# class verifyReport(serializers.ModelSerializer):
+#     class Meta:
+#         model = report
+#         fields = []

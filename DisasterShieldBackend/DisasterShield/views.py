@@ -39,6 +39,7 @@ def create_report(request):
             return Response({'error': f'Error unpacking bounding box coordinates: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
         reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+        curr_location = (latitude, longitude)
 
         try:
             curr_reputation = userReputation.objects.get(username=data.get('username')).reputation
@@ -63,7 +64,11 @@ def create_report(request):
             reports.update(severity=curr_severity + severity_inc)
             if curr_severity + severity_inc >= 7:
                 inform_authorities()
-            return Response({'message': 'Report updated successfully'}, status=status.HTTP_200_OK)
+            
+            serializer = reportsSerializer(reports, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            # return Response({'message': 'Report updated successfully'}, status=status.HTTP_200_OK)
+            
         else:
             data['severity'] = severity_set
             print(data['severity'])
@@ -80,3 +85,31 @@ def create_report(request):
         reports = report.objects.all()
         serializer = reportsSerializer(reports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+
+def verify_report(request):
+
+    data = request.data
+
+    response = data.get('response')
+    uname = data.get('username')
+    report_id = data.get('id')
+
+
+    curr_severity = report.objects.filter(username=uname).values('severity')
+
+    if response == True:
+        report.objects.filter(username=uname).update(severity = curr_severity+1)
+        if(curr_severity + 1 >= 7):
+            user = report.objects.filter(username=uname).values('username')
+            curr_reputation = userReputation.objects.filter(username=user).values('reputation')
+            userReputation.objects.filter(username=user).update(reputation = curr_reputation+1)
+            inform_authorities()
+    else:
+        report.objects.filter(username=uname).update(severity = curr_severity-1)
+        if(report.objects.filter(username=uname).values('severity') <= -2):
+            user = report.objects.filter(username=uname).values('username')
+            curr_reputation = userReputation.objects.filter(username=user).values('reputation')
+            userReputation.objects.filter(username=user).update(reputation = curr_reputation-1)
+            report.objects.filter(username=uname).delete()
