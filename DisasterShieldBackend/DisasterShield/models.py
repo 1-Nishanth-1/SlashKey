@@ -3,6 +3,11 @@ import uuid
 
 # Create your models here.
 
+class userReputation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    username = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    reputation = models.IntegerField(default=0)
+
 class missingPerson(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -21,7 +26,7 @@ class report(models.Model):
     desc = models.TextField()
     image = models.ImageField(upload_to='static/images/', null=True)
     is_valid = models.BooleanField(default=True)
-    severity = models.IntegerField(default=0)
+    severity = models.IntegerField(default=1)
 
 
 class Blood_donation(models.Model):
