@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Popup, Marker, Circle } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState, useRef, useMemo } from "react";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; 
 
 function Map() {
   const [draggable, setDraggable] = useState(false);
@@ -10,6 +10,15 @@ function Map() {
   const [warning, setWarning] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [calamityData, setCalamityData] = useState([]);
+
+  const fetchCalamity = () => {
+    fetch("http://127.0.0.1:8000/api/report/")
+      .then((res) => res.json())
+      .then((res) => {
+        setCalamityData(res);
+      });
+  };
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -27,6 +36,7 @@ function Map() {
     } else {
       console.log("Geolocation is not available in your browser.");
     }
+    fetchCalamity();
   }, []);
 
   const eventHandlers = useMemo(
@@ -80,7 +90,10 @@ function Map() {
       },
     })
       .then((response) => response.json())
-      .then((data) => console.log("Success:", data))
+      .then((data) => {
+        console.log("Success:", data);
+        setCalamityData([...calamityData, data]);
+      })
       .catch((error) => console.error("Error submitting form:", error));
 
     console.log("Warning:", warning);
@@ -102,29 +115,21 @@ function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker
-        
           draggable={draggable}
           eventHandlers={eventHandlers}
           position={[position.latitude, position.longitude]}
           ref={markerRef}
         >
-          <Circle 
-              center={[position.latitude, position.longitude]} 
-              pathOptions={{color: 'red'}} 
-              radius={3000}>
-        </Circle>
           <Popup minWidth={90}>
             {draggable ? (
               <form className="min-w-72" onSubmit={handleSubmit}>
-                
                 <input
-                placeholder="Enter Warning"
-                value={warning}
-                type="text"
-                onChange={(e) => setWarning(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-                
-              />
+                  placeholder="Enter Warning"
+                  value={warning}
+                  type="text"
+                  onChange={(e) => setWarning(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+                />
                 <input
                   type="text"
                   placeholder="Enter Description"
@@ -134,23 +139,29 @@ function Map() {
                 />
                 <input
                   type="file"
-                  class="block mt-3 w-full text-sm text-slate-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-violet-50 file:text-violet-700
-                hover:file:bg-violet-100"
+                  className="block mt-3 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                   onChange={(e) => setImage(e.target.files[0])}
                 />
-                <button type="submit" className="mt-3 bg-black text-white font-semibold rounded-3xl py-1.5 px-4">Submit</button>
+                <button type="submit" className="mt-3 bg-black text-white font-semibold rounded-3xl py-1.5 px-4">
+                  Submit
+                </button>
               </form>
             ) : (
-              <button onClick={toggleDraggable}>
-                Click here to add a warning
-              </button>
+              <button onClick={toggleDraggable}>Click here to add a warning</button>
             )}
           </Popup>
         </Marker>
+        {calamityData.map((calamity) => {
+            return (
+              <Circle
+                key={calamity.id} // Assuming `id` is a unique identifier for each calamity
+                center={[calamity.latitude, calamity.longitude]}
+                pathOptions={{ color: calamity.severity > 5 ? "red" : "yellow" }}
+                radius={3000}
+              />
+            );
+          } 
+        )}
       </MapContainer>
     )
   );
