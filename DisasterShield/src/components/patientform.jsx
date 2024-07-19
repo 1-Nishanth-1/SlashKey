@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import question from '../assets/question.png'
-const AddMissing = () => {
+import { useState } from "react";
+const PatientForm = () => {
     const [person, setPerson] = useState({
         name: '',
         age: null,
-        seen: '',
+        group: '',
         image: null,
     })
     const handleChange = (e) => {
@@ -15,7 +14,7 @@ const AddMissing = () => {
     }
     return(
         <div className="mt-5 ml-52 p-5">
-            <h1 className="font-semibold text-3xl">ADD MISSING PEOPLE</h1>
+            <h1 className="font-semibold text-3xl">ADD PATIENT INFO</h1>
             <div className="rounded-md ring-1 mt-5 ring-slate-900/5 shadow-lg p-5 flex justify-start gap-y-3 flex-col ">
             <label htmlFor="" className="font-semibold text-lg">Name</label>
             <input
@@ -36,13 +35,13 @@ const AddMissing = () => {
                 name="age"
                 id="name"
               />
-              <label htmlFor="" className="text-lg font-semibold">Last Seen</label>
+              <label htmlFor="" className="text-lg font-semibold">Group</label>
               <input
-                value={person.seen}
+                value={person.group}
                 onChange={handleChange}
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-                name="seen"
+                name="group"
                 id="name"
               />
               <input type="file" onChange={handleImage} name="image" class="block w-full text-sm text-slate-500
@@ -59,5 +58,5 @@ const AddMissing = () => {
             
         </div>
     )
-}   
-export default AddMissing;
+}
+export default PatientForm;
