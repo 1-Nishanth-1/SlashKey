@@ -1,11 +1,15 @@
 import { MapContainer, TileLayer, Popup, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { jwtDecode } from "jwt-decode";
 
 function Map() {
   const [draggable, setDraggable] = useState(false);
   const markerRef = useRef(null);
   const [position, setPosition] = useState({ latitude: null, longitude: null });
+  const [warning, setWarning] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -39,9 +43,50 @@ function Map() {
     []
   );
 
-  const toggleDraggable = useCallback(() => {
+  const toggleDraggable = () => {
     setDraggable((d) => !d);
-  }, []);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const accessToken = localStorage.getItem("AccessToken");
+
+    if (!accessToken) {
+      console.error("No access token found in localStorage.");
+      return;
+    }
+
+    let decoded;
+    try {
+      decoded = jwtDecode(accessToken);
+    } catch (error) {
+      console.error("Error decoding JWT:", error);
+      return;
+    }
+    console.log("Decoded JWT:", decoded);
+
+    fetch("http://127.0.0.1:8000/api/report/", {
+      method: "POST",
+      body: JSON.stringify({
+        desc: description,
+        image: image,
+        latitude: position.latitude,
+        longitude: position.longitude,
+        username: decoded.user_id,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Success:", data))
+      .catch((error) => console.error("Error submitting form:", error));
+
+    console.log("Warning:", warning);
+    console.log("Description:", description);
+    console.log("Image:", image);
+  };
 
   return (
     position.latitude !== null &&
@@ -50,7 +95,7 @@ function Map() {
         center={[position.latitude, position.longitude]}
         zoom={10}
         scrollWheelZoom={false}
-        style={{ height: "100vh", width: "100%" }} // Ensure map takes up full screen
+        style={{ height: "100vh", width: "100%" }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -63,11 +108,31 @@ function Map() {
           ref={markerRef}
         >
           <Popup minWidth={90}>
-            <span onClick={toggleDraggable}>
-              {draggable
-                ? "Marker is draggable"
-                : "Click here to make marker draggable"}
-            </span>
+            {draggable ? (
+              <form onSubmit={handleSubmit}>
+                <input
+                  type="text"
+                  placeholder="Enter Warning"
+                  value={warning}
+                  onChange={(e) => setWarning(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+                <input
+                  type="file"
+                  onChange={(e) => setImage(e.target.files[0])}
+                />
+                <button type="submit">Submit</button>
+              </form>
+            ) : (
+              <button onClick={toggleDraggable}>
+                Click here to add a warning
+              </button>
+            )}
           </Popup>
         </Marker>
       </MapContainer>
