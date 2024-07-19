@@ -24,7 +24,6 @@ function Navbar() {
                 
             </ul>
             <ul className="hidden md:flex items-center">
-                <NavLink to={"/add-response"}><button><h2 className="text-3xl mr-4 font-semibold mx-auto my-auto border-[1px] border-black rounded-md py-2 px-4">+</h2></button></NavLink>
                 <NavLink to={"/signin"}><button className="border-2 mr-4 border-black bg-white text-black rounded-2xl py-1.5 px-4 font-semibold">Sign In</button></NavLink>
                 <NavLink to={"/register"}><button className=" bg-black text-white rounded-2xl py-1.5 px-4 font-semibold">Join Now</button></NavLink>
             </ul>
