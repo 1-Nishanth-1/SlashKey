@@ -19,17 +19,64 @@ class UserRegistrationView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
 def inform_authorities():
     # Send a notification to the authorities
     pass
-    
-@api_view(['POST'])
+
+@api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
 def create_report(request):
-    serializer = reportsSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    else:
-        print("Error creating report:", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == 'POST':
+        data = request.data
+
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        try:
+            lat_min, lat_max, lon_min, lon_max = utils.boundingBox(latitude, longitude, 0.5)
+        except ValueError as e:
+            return Response({'error': f'Error unpacking bounding box coordinates: {e}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        reports = report.objects.filter(latitude__gte=lat_min, latitude__lte=lat_max, longitude__gte=lon_min, longitude__lte=lon_max)
+
+        try:
+            curr_reputation = userReputation.objects.get(username=data.get('username')).reputation
+            print(curr_reputation)
+        except userReputation.DoesNotExist:
+            curr_reputation = 0
+
+        severity_inc = 1
+        severity_set = 1
+
+        if curr_reputation <= -10:
+            return Response({'error': 'User reputation too low to create a report'}, status=status.HTTP_403_FORBIDDEN)
+        elif curr_reputation > -10 and curr_reputation <= -5:
+            severity_inc = 0
+            severity_set = 0
+        elif curr_reputation <= 0:
+            severity_inc = 1
+            severity_set = 0
+
+        if reports.exists():
+            curr_severity = reports.first().severity
+            reports.update(severity=curr_severity + severity_inc)
+            if curr_severity + severity_inc >= 7:
+                inform_authorities()
+            return Response({'message': 'Report updated successfully'}, status=status.HTTP_200_OK)
+        else:
+            data['severity'] = severity_set
+            print(data['severity'])
+            serializer = reportsSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Error creating report:", serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    elif request.method == 'GET':
+        reports = report.objects.all()
+        serializer = reportsSerializer(reports, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

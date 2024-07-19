@@ -66,7 +66,7 @@ function Map() {
     }
     console.log("Decoded JWT:", decoded);
 
-    fetch("http://192.168.126.77:8000/api/report/", {
+    fetch("http://127.0.0.1:8000/api/report/", {
       method: "POST",
       body: JSON.stringify({
         desc: description,

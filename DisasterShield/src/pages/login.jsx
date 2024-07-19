@@ -20,7 +20,7 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch("http://192.168.126.77:8000/api/api/token/", {
+    fetch("http://127.0.0.1:8000/api/api/token/", {
       method: "POST",
       body: JSON.stringify({
         username: user.name,
