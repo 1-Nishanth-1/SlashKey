@@ -14,7 +14,7 @@ function Navbar() {
     return (
         <header>
             <ResponsiveNavbar state={clicked} setState={setClicked} />
-            <nav className="flex w-full h-24 px-10 items-center justify-between bg-white shadow-md z-40">
+            <nav className="flex w-full fixed top-0 left-0 h-24 px-10 items-center justify-between bg-white shadow-md z-40">
             <ul className="flex items-center gap-x-7">
                 <NavLink to={"/"}><h1 className="text-3xl font-bold">DisasterShield</h1></NavLink>
                 <div className={"hidden items-center md:flex gap-x-7"}>

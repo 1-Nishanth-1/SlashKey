@@ -11,6 +11,7 @@ import Missing from './pages/missing'
 import HelpAndServicePage from './pages/helpAndService'
 import { Toaster } from 'sonner'
 import Information from './pages/information'
+import Emergency from './pages/emergency'
 function App() {
   return (
     <>
@@ -18,7 +19,7 @@ function App() {
       <Navbar />
       <Toaster richColors position='top-right'/>
       <Routes>
-        <Route path='/emergency' element={<Information />}/>
+        <Route path='/emergency' element={<Emergency />}/>
         <Route path='/missing' element={<Missing />} />
         <Route path='/help' element={<HelpAndServicePage />}/>
         <Route path='/signin' element={<Login />}/>
