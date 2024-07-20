@@ -40,3 +40,8 @@ class latlongSerializer(serializers.ModelSerializer):
         model = report
         fields = ['latitude', 'longitude']
 
+
+class missingPeopleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = missingPerson
+        fields = ['age', 'name', 'gender', 'found', 'desc', 'image']
