@@ -7,6 +7,10 @@ from rest_framework.views import APIView
 from .serializers import *
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
+from django.contrib.auth import authenticate
+from django.core.serializers import serialize
+from django.http import JsonResponse
+
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -125,3 +129,37 @@ def blood_donation_fn(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def user_login(request):
+    data = request.data
+
+    username = data.get('username')
+    password = data.get('password')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    # print(username, password, latitude, longitude)
+
+
+
+    user = authenticate(username=username, password=password)
+    
+    if user is not None:
+        coords = report.objects.all()
+        temp = latlongSerializer(coords, many=True)
+        data = temp.data
+        # print(data)
+
+        for i in data:
+            t1, t2 = i['latitude'], i['longitude']
+            temp = utils.dist(float(t1), float(t2), float(latitude), float(longitude))
+            if temp <= 10:
+                return JsonResponse({'status': 'Unsafe'})
+                break
+        else:
+            return JsonResponse({'status': 'Safe'})
+
+    else:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)

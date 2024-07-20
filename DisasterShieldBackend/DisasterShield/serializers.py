@@ -35,5 +35,8 @@ class bloodDonationSerializer(serializers.ModelSerializer):
         fields = ['username', 'priority', 'patient_name', 'blood_type', 'contact_number', 'age', 'gender', 'is_valid']
 
 
+class latlongSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = report
+        fields = ['latitude', 'longitude']
 
-    

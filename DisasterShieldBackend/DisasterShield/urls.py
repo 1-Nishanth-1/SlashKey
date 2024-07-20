@@ -12,4 +12,5 @@ urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('report/', views.create_report, name='report'),  # Use the direct import name
     path('blooddonation/', views.blood_donation_fn, name='blooddonation'),
+    path('userlogin/', views.user_login, name='userlogin'),
 ]

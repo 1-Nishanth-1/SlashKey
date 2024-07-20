@@ -1,4 +1,5 @@
 from math import cos, pi, sin, sqrt
+import numpy as np
 
 def coordinate_offset(latitude, longitude, offset):
     # Position, decimal degrees
@@ -64,3 +65,17 @@ def boundingBox(latitudeInDegrees, longitudeInDegrees, halfSideInKm):
 
     return (rad2deg(latMin), rad2deg(lonMin), rad2deg(latMax), rad2deg(lonMax))
 
+
+
+
+def dist(Latitute_1, Longitute_1, Latitute_2, Longitute_2):
+
+    P1 = abs(Latitute_1 - Latitute_2)
+    P2 = abs(Longitute_1 - Longitute_2)
+
+    temp = abs(float(P1*P1) - float(P2*P2))
+
+    euclid_dist = np.sqrt(temp)
+    euclid_dist = euclid_dist*111
+
+    return float(euclid_dist)
