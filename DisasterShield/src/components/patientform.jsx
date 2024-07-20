@@ -101,16 +101,25 @@ const PatientForm = () => {
           id="age"
         />
         <label htmlFor="blood_type" className="text-lg font-semibold">
-          Group
+          Blood Group
         </label>
-        <input
+        <select
           value={person.blood_type}
           onChange={handleChange}
-          type="text"
-          className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
           name="blood_type"
           id="blood_type"
-        />
+          className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
+        >
+          <option value="">Select Blood Group</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
         <label htmlFor="contact_number" className="text-lg font-semibold">
           Contact
         </label>
