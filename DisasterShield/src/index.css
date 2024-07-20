@@ -4,7 +4,13 @@
 .leaflet-container {
   width: 100%;
   height: 100vh;
+  z-index: 1;
+  position: relative;
 }
 body {
   margin-top: 96px;
+}
+.drawer-container {
+  position: relative;
+  z-index: 2;
 }
