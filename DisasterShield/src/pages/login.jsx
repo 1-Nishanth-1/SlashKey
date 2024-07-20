@@ -40,6 +40,7 @@ function Login() {
       .then((response) => {
         localStorage.setItem("AccessToken", JSON.stringify(response.access));
         localStorage.setItem("RefreshToken", JSON.stringify(response.refresh));
+        
         navigate("/");
       })
       .catch((error) => {

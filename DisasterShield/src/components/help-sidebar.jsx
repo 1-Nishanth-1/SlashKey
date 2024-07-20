@@ -2,8 +2,9 @@ import { useState } from "react";
 import BloodDonation from "../pages/donation";
 import AddMissing from "./addmissing";
 import PatientForm from "./patientform";
+import Missing from "./missing";
 const HelpSideBar = () => {
-    const tabs = [<BloodDonation />, <AddMissing />,<PatientForm />];
+    const tabs = [<BloodDonation />,<Missing />,<AddMissing />, <PatientForm />];
     const [selectedOption, setOption] = useState(0);
 
     const handleOption = (index) => () => {

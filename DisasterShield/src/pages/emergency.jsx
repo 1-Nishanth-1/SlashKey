@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import police from '../assets/police.jpg';
-import { policeStationValidator, HospitalValidator } from "../utils/emergencyValidation";
+import medical from "../assets/medical.jpg"
 import EmergencyCard from "../components/emergencycard";
 
 const Emergency = () => {
@@ -28,9 +28,11 @@ const Emergency = () => {
 
     return (
         <>
-            <h1 className="font-semibold text-4xl ml-3 mt-3">EMERGENCY CONTACT</h1>
-            <EmergencyCard image={police} name={nearestPoliceStation} />
-            <EmergencyCard image={police} name={nearestHospital} />
+            <h1 className="font-semibold text-2xl ml-3 pt-5">EMERGENCY CONTACT</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 p-10 gap-3">
+                <EmergencyCard image={police} name={nearestPoliceStation} title={"Police Station"}/>
+                <EmergencyCard image={medical} name={nearestHospital} title={"Hospital"} />
+            </div>
             {/* You might want to include hospital information as well */}
         </>
     );

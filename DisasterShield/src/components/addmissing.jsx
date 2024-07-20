@@ -4,14 +4,26 @@ const AddMissing = () => {
     const [person, setPerson] = useState({
         name: '',
         age: null,
-        seen: '',
-        image: null,
+        gender: '',
+        desc: '',
+        
     })
+    const handleSubmit = () => {
+        console.log(person)
+        fetch("http://127.0.0.1:8000/api/missingpeople/",{
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(person)
+        });
+    }
     const handleChange = (e) => {
         setPerson({...person, [e.target.name]:e.target.value});
     }
-    const handleImage = (e) => {
-        setPerson({...person, image: e.target.files[0]});
+    const handleRadio = (e) => {
+        setPerson({...person, gender: e.target.id});
     }
     return(
         <div className="mt-5 ml-52 p-5">
@@ -36,24 +48,30 @@ const AddMissing = () => {
                 name="age"
                 id="name"
               />
-              <label htmlFor="" className="text-lg font-semibold">Last Seen</label>
+              <label htmlFor="" className="text-lg font-semibold">Description</label>
               <input
-                value={person.seen}
+                value={person.desc}
                 onChange={handleChange}
                 type="text"
                 className="w-full p-2 border border-gray-300 rounded-md placeholder:font-light placeholder:text-gray-500"
-                name="seen"
+                name="desc"
                 id="name"
               />
-              <input type="file" onChange={handleImage} name="image" class="block w-full text-sm text-slate-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-violet-50 file:text-violet-700
-                hover:file:bg-violet-100
-                "/>
-                {person.image != null ? <img className='h-52 w-full' src={URL.createObjectURL(person.image)} alt="" /> : null}
-                <button className='text-lg font-semibold py-1.5 px-4 bg-black text-white rounded-md'>Submit</button>
+              <label htmlFor="" className="text-lg font-semibold">Gender</label>
+              <div className='flex gap-x-4 items-center'>
+              <label htmlFor="" className="text-md font-semibold">Male</label>
+                <input type="radio" name="gender" onClick={handleRadio} id="M" />
+                <label htmlFor="" className="text-md font-semibold" onClick={handleRadio}>Female</label>
+                <input type="radio" name="gender" id="F" />
+              </div>
+              <button
+          type="submit"
+          onClick={handleSubmit}
+          className="text-lg font-semibold py-1.5 px-4 bg-black text-white rounded-md"
+        >
+          Submit
+        </button>
+              
             </div>
 
             
